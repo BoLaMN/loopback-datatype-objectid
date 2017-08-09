@@ -2,9 +2,8 @@ var mongodb;
 
 mongodb = require('mongodb');
 
-module.exports = function(arg) {
-  var ObjectID, registry, remotes;
-  registry = arg.registry, remotes = arg.remotes;
+module.exports = function(app) {
+  var ObjectID;
   ObjectID = function(id) {
     var e;
     if (!id) {
@@ -26,8 +25,8 @@ module.exports = function(arg) {
     }
     return id;
   };
-  registry.modelBuilder.defineValueType(ObjectID);
-  remotes()._typeRegistry.registerType('objectid', {
+  app.registry.modelBuilder.defineValueType(ObjectID);
+  app.remotes()._typeRegistry.registerType('objectid', {
     fromTypedValue: function(ctx, value, options) {
       var error;
       if (value == null) {

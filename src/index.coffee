@@ -1,6 +1,6 @@
 mongodb = require 'mongodb'
 
-module.exports = ({ registry, remotes }) ->
+module.exports = (app) ->
 
   ObjectID = (id) ->
     if not id
@@ -20,9 +20,9 @@ module.exports = ({ registry, remotes }) ->
 
     id
 
-  registry.modelBuilder.defineValueType ObjectID
+  app.registry.modelBuilder.defineValueType ObjectID
 
-  remotes()._typeRegistry.registerType 'objectid',
+  app.remotes()._typeRegistry.registerType 'objectid',
 
     fromTypedValue: (ctx, value, options) ->
       if not value?
