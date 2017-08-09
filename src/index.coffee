@@ -9,50 +9,46 @@ module.exports = ({ registry, remotes }) ->
     if id instanceof mongodb.ObjectID
       return id
 
-    if typeof id != 'string'
+    if typeof id isnt 'string'
       return id
-
-    try
-      if /^[0-9a-fA-F]{24}$/.test(id)
-        return new mongodb.ObjectID(id)
-      else
+    
+    if /^[0-9a-fA-F]{24}$/.test id
+      try
+        return new mongodb.ObjectID id
+      catch e
         return id
-    catch e
-      return id
 
-    return
+    id
 
   registry.modelBuilder.defineValueType ObjectID
 
-  remotes().defineType 'ObjectId',
-    fromTypedValue: (ctx, value) ->
+  remotes()._typeRegistry.registerType 'objectid',
+
+    fromTypedValue: (ctx, value, options) ->
       if not value?
         return { value }
 
-      value = new ObjectID value
       error = @validate ctx, value
 
       if error
         { error }
       else 
         { value }
+    
+    fromSloppyValue: (ctx, value, options) ->
+      if value is ''
+        return { value: undefined }
 
-    fromSloppyValue: (ctx, value) ->
-      objectConverter = ctx.typeRegistry.getConverter 'object'
-      result = objectConverter.fromSloppyString ctx, value
+      value = new ObjectID value
 
-      if result.error 
-        result 
-      else 
-        @fromTypedValue ctx, result.value
-
-    validate: (ctx, value) ->
-      if not value?
+      @fromTypedValue ctx, value, options
+    
+    validate: (ctx, value, options) ->
+      if value is undefined or value instanceof mongodb.ObjectID
         return null
-
-      if typeof value isnt 'object' or !(value instanceof ObjectID)
-        return new Error 'Value is not an instance of ObjectID.'
-
-      null
+      
+      err = new Error 'Value is not an instance of ObjectID.'
+      err.statusCode = 400
+      err
 
   return

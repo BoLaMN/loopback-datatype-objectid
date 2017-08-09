@@ -16,27 +16,25 @@ module.exports = function(arg) {
     if (typeof id !== 'string') {
       return id;
     }
-    try {
-      if (/^[0-9a-fA-F]{24}$/.test(id)) {
+    if (/^[0-9a-fA-F]{24}$/.test(id)) {
+      try {
         return new mongodb.ObjectID(id);
-      } else {
+      } catch (error1) {
+        e = error1;
         return id;
       }
-    } catch (error1) {
-      e = error1;
-      return id;
     }
+    return id;
   };
   registry.modelBuilder.defineValueType(ObjectID);
-  remotes().defineType('ObjectId', {
-    fromTypedValue: function(ctx, value) {
+  remotes()._typeRegistry.registerType('objectid', {
+    fromTypedValue: function(ctx, value, options) {
       var error;
       if (value == null) {
         return {
           value: value
         };
       }
-      value = new ObjectID(value);
       error = this.validate(ctx, value);
       if (error) {
         return {
@@ -48,24 +46,23 @@ module.exports = function(arg) {
         };
       }
     },
-    fromSloppyValue: function(ctx, value) {
-      var objectConverter, result;
-      objectConverter = ctx.typeRegistry.getConverter('object');
-      result = objectConverter.fromSloppyString(ctx, value);
-      if (result.error) {
-        return result;
-      } else {
-        return this.fromTypedValue(ctx, result.value);
+    fromSloppyValue: function(ctx, value, options) {
+      if (value === '') {
+        return {
+          value: void 0
+        };
       }
+      value = new ObjectID(value);
+      return this.fromTypedValue(ctx, value, options);
     },
-    validate: function(ctx, value) {
-      if (value == null) {
+    validate: function(ctx, value, options) {
+      var err;
+      if (value === void 0 || value instanceof mongodb.ObjectID) {
         return null;
       }
-      if (typeof value !== 'object' || !(value instanceof ObjectID)) {
-        return new Error('Value is not an instance of ObjectID.');
-      }
-      return null;
+      err = new Error('Value is not an instance of ObjectID.');
+      err.statusCode = 400;
+      return err;
     }
   });
 };
