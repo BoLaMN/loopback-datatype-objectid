@@ -1,6 +1,6 @@
 {
   "name": "loopback-datatype-objectid",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "mongodb": "^2.2.30"
+    "mongodb": "^3.0.10"
   }
 }
