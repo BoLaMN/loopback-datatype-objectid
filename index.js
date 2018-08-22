@@ -1,67 +1,73 @@
-var mongodb;
-
-mongodb = require('mongodb');
+const mongodb = require('mongodb');
 
 module.exports = function(app) {
-  var ObjectID;
-  ObjectID = function(id) {
-    var e;
+
+  const ObjectID = function(id) {
     if (!id) {
       return new mongodb.ObjectID();
     }
+
     if (id instanceof mongodb.ObjectID) {
       return id;
     }
+
     if (typeof id !== 'string') {
       return id;
     }
+
     if (/^[0-9a-fA-F]{24}$/.test(id)) {
       try {
         return new mongodb.ObjectID(id);
-      } catch (error1) {
-        e = error1;
+      } catch (e) {
         return id;
       }
     }
+
     return id;
   };
+
   app.registry.modelBuilder.defineValueType(ObjectID);
-  app.remotes()._typeRegistry.registerType('objectid', {
-    fromTypedValue: function(ctx, value, options) {
-      var error;
-      if (value == null) {
-        return {
-          value: value
-        };
+
+  app.once('listening', function() {
+
+    app.remotes()._typeRegistry.registerType('objectid', {
+
+      fromTypedValue(ctx, value, options) {
+        if ((value == null)) {
+          return { value };
+        }
+
+        const error = this.validate(ctx, value);
+
+        if (error) {
+          return { error };
+        } else {
+          return { value };
+        }
+      },
+
+      fromSloppyValue(ctx, value, options) {
+        if (value === '') {
+          return { value: undefined };
+        }
+
+        value = new ObjectID(value);
+
+        return this.fromTypedValue(ctx, value, options);
+      },
+
+      validate(ctx, value, options) {
+        if ((value === undefined) || value instanceof mongodb.ObjectID) {
+          return null;
+        }
+
+        const err = new Error('Value is not an instance of ObjectID.');
+        err.statusCode = 400;
+        return err;
       }
-      error = this.validate(ctx, value);
-      if (error) {
-        return {
-          error: error
-        };
-      } else {
-        return {
-          value: value
-        };
-      }
-    },
-    fromSloppyValue: function(ctx, value, options) {
-      if (value === '') {
-        return {
-          value: void 0
-        };
-      }
-      value = new ObjectID(value);
-      return this.fromTypedValue(ctx, value, options);
-    },
-    validate: function(ctx, value, options) {
-      var err;
-      if (value === void 0 || value instanceof mongodb.ObjectID) {
-        return null;
-      }
-      err = new Error('Value is not an instance of ObjectID.');
-      err.statusCode = 400;
-      return err;
     }
+    );
+
   });
+
 };
