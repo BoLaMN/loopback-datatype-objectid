@@ -1,13 +1,13 @@
-const mongodb = require('mongodb');
+const bson = require('bson');
 
 module.exports = function(app) {
 
   const ObjectID = function(id) {
     if (!id) {
-      return new mongodb.ObjectID();
+      return new bson.ObjectID();
     }
 
-    if (id instanceof mongodb.ObjectID) {
+    if (id instanceof bson.ObjectID) {
       return id;
     }
 
@@ -17,7 +17,7 @@ module.exports = function(app) {
 
     if (/^[0-9a-fA-F]{24}$/.test(id)) {
       try {
-        return new mongodb.ObjectID(id);
+        return new bson.ObjectID(id);
       } catch (e) {
         return id;
       }
@@ -57,7 +57,7 @@ module.exports = function(app) {
       },
 
       validate(ctx, value, options) {
-        if ((value === undefined) || value instanceof mongodb.ObjectID) {
+        if ((value === undefined) || value instanceof bson.ObjectID) {
           return null;
         }
 

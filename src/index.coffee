@@ -1,12 +1,12 @@
-mongodb = require 'mongodb'
+bson = require 'bson'
 
 module.exports = (app) ->
 
   ObjectID = (id) ->
     if not id
-      return new mongodb.ObjectID()
+      return new bson.ObjectID()
 
-    if id instanceof mongodb.ObjectID
+    if id instanceof bson.ObjectID
       return id
 
     if typeof id isnt 'string'
@@ -14,7 +14,7 @@ module.exports = (app) ->
 
     if /^[0-9a-fA-F]{24}$/.test id
       try
-        return new mongodb.ObjectID id
+        return new bson.ObjectID id
       catch e
         return id
 
@@ -46,7 +46,7 @@ module.exports = (app) ->
         @fromTypedValue ctx, value, options
 
       validate: (ctx, value, options) ->
-        if value is undefined or value instanceof mongodb.ObjectID
+        if value is undefined or value instanceof bson.ObjectID
           return null
 
         err = new Error 'Value is not an instance of ObjectID.'
