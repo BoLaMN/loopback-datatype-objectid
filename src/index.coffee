@@ -4,9 +4,9 @@ module.exports = (app) ->
 
   ObjectID = (id) ->
     if not id
-      return new bson.ObjectID()
+      return new bson.ObjectId()
 
-    if id instanceof bson.ObjectID
+    if id instanceof bson.ObjectId
       return id
 
     if typeof id isnt 'string'
@@ -14,7 +14,7 @@ module.exports = (app) ->
 
     if /^[0-9a-fA-F]{24}$/.test id
       try
-        return new bson.ObjectID id
+        return new bson.ObjectId id
       catch e
         return id
 
@@ -46,7 +46,7 @@ module.exports = (app) ->
         @fromTypedValue ctx, value, options
 
       validate: (ctx, value, options) ->
-        if value is undefined or value instanceof bson.ObjectID
+        if value is undefined or value instanceof bson.ObjectId
           return null
 
         err = new Error 'Value is not an instance of ObjectID.'
